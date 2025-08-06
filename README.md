@@ -1,69 +1,95 @@
-# React + TypeScript + Vite
+# 🔐 4-Digit Guessing Game
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time 2-player web game where players take turns guessing a shared 4-digit password. The game provides feedback on each guess — and even allows one AI-generated hint per player using Gemini!
 
-Currently, two official plugins are available:
+Built with:
+- 🔁 **React + TypeScript** frontend
+- 🧠 **Node.js + Socket.IO** backend
+- 💡 **Google Gemini API** for AI hints
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🕹️ Gameplay Overview
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Two players join the same room by entering the same **Room ID**.
+- A 4-digit password is randomly generated and shared between them.
+- Players take turns guessing the password.
+- After each guess, they receive feedback:
+  - ✅ Correct digits in the correct position
+  - 🔄 Correct digits in the wrong position
+- Each player can request **one AI-generated hint** during the game.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## 🚀 Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Clone the repo
+```bash
+git clone https://github.com/LiorSilberman/web-game.git
+cd web-game
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. Backend Setup
+#### Install dependencies
+```bash
+cd game-backend
+npm install
 ```
+
+#### Create `.env` file
+```bash
+GEMINI_API_KEY=your_google_generative_ai_key
+```
+
+#### Start the server
+```bash
+node server.js
+```
+
+**The backend will run on http://localhost:3001** Or **http://your_ip_address:3001** 
+
+
+### 3. Frontend Setup
+#### Install dependencies
+```bash
+cd game-frontend
+npm install
+```
+
+## 💡 Hint System (Gemini API)
+**Each player can request one personalized hint during the game. Hints are:**
+- Based on the password and the player's guess history.
+- Slightly funny, but helpful.
+- Generated using Google's Gemini Flash 2.0 model.
+
+## 🧪 Features
+- [x] 🔐 Real-time game rooms using WebSocket
+- [x] 🕵️ Turn-based password guessing
+- [x] 📜 Guess history tracking
+- [x] 🤖 One hint per player via Gemini
+
+
+## 🛠️ Technologies Used
+- React with TypeScript
+- Node.js + Express
+- Socket.IO
+- Google Generative AI API (Gemini)
+- Vite for fast frontend dev
+- CSS for styling
+
+## ✅ TODOs
+- [ ] Rematch support (TODO)
+- [ ] Add animations and sounds
+- [ ] Show game stats after win
+- [ ] Add timer and score
+- [ ] Deploy to Vercel / Render / Railway
+
+## 📸 Screenshots
+<div>
+  <img src="./screenshots/enter-room.jpeg" alt="Choose room" width="300"/>
+  <img src="./screenshots/waiting-start.png" alt="wait for opponent screen" width="300"/>
+  <img src="./screenshots/guessNumbers.jpeg" alt="guess the password" width="300"/>
+  <img src="./screenshots/hint.png" alt="Get hint from Gemini" width="300"/>
+  <img src="./screenshots/lostGame.jpeg" alt="Lost game display" width="300"/>
+  <img src="./screenshots/winGame.png" alt="Win game display" width="300"/>
+</div>
