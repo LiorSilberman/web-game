@@ -2,28 +2,63 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import GameType from './components/GameType';
 import { socket } from './socket';
+import type { LabeledHistType } from './types/types';
 
-type histType = {
-  pass: string;
-  correctDigits: number;
-  correctPositions: number;
-  time: Date;
-};
+
 
 function App() {
-  const [myHistory, setMyHistory] = useState<histType[]>([]);
-  const [opponentHistory, setOpponentHistory] = useState<histType[]>([]);
   const [roomId, setRoomId] = useState('');
   const [joinedRoom, setJoinedRoom] = useState(false);
   const [startGame, setStartGame] = useState(false);
+  const [combinedHistory, setCombinedHistory] = useState<LabeledHistType[]>([]);
 
   // NEW: track whose turn it is
   const [isMyTurn, setIsMyTurn] = useState(false);
 
+  const [hintUsed, setHintUsed] = useState<boolean>(false);
+  const [hint, setHint] = useState<string>('');
+
+  const [userId] = useState(() => {
+    let id = localStorage.getItem('userId');
+    if (!id) {
+      id = self.crypto?.randomUUID?.() || generateFallbackId();
+      localStorage.setItem('userId', id);
+    }
+    return id;
+  });
+
+  function generateFallbackId() {
+    return 'xxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  const requestHint = () => {
+    if (!hintUsed) {
+      socket.emit('request-hint', { roomId, userId });
+    }
+  }
+
+  useEffect(() => {
+    socket.on('receive-hint', (hintMsg) => {
+      if (hintMsg === 'already-used') {
+        setHintUsed(true);
+      } else if (typeof hintMsg === 'string') {
+        setHint(hintMsg);
+        setHintUsed(true);
+      }
+    });
+
+    return () => {
+      socket.off('receive-hint');
+    }
+  }, []);
+
   useEffect(() => {
     // Listen for turn changes as soon as App mounts
     socket.on('your-turn', (flag: boolean) => {
-      console.log('▶️ your-turn event:', flag);
       setIsMyTurn(flag);
     });
     return () => {
@@ -32,13 +67,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    socket.on('joined', (room) => {
-      console.log(`✅ Joined room ${room}`);
+    socket.on('joined', () => {
       setJoinedRoom(true);
     });
 
     socket.on('start-game', () => {
-      console.log('🎮 Game started!');
       setStartGame(true);
     });
 
@@ -53,68 +86,45 @@ function App() {
     };
   }, []);
 
-  // My guess results (from backend validation)
+
   useEffect(() => {
-    socket.on('guess-feedback', (result) => {
-      const { guess, correctDigits, correctPositions, time } = result;
-      setMyHistory((prev) => [
-        ...prev,
-        { pass: guess, correctDigits, correctPositions, time: new Date(time) },
-      ]);
+    socket.on('guess-history', ({ history }: { history: LabeledHistType[] }) => {
+      const parsed = history.map((h) => ({ ...h, time: new Date(h.time) }));
+      parsed.sort((a, b) => b.time.getTime() - a.time.getTime());
+      setCombinedHistory(parsed);
     });
+
     return () => {
-      socket.off('guess-feedback');
+      socket.off('guess-history');
     };
   }, []);
 
-  // Opponent guess progress
-  useEffect(() => {
-    socket.on('opponent-guess-feedback', (result) => {
-      const { guess, correctDigits, correctPositions, time } = result;
-      setOpponentHistory((prev) => [
-        ...prev,
-        { pass: guess, correctDigits, correctPositions, time: new Date(time) },
-      ]);
-    });
-    return () => {
-      socket.off('opponent-guess-feedback');
-    };
-  }, []);
-
-  const handleCallBack = (hist: histType): void => {
-    setMyHistory((prev) => [...prev, hist]);
-  };
 
   const handleJoin = () => {
     const trimmedRoom = roomId.trim();
     if (trimmedRoom) {
       localStorage.setItem('roomId', trimmedRoom);
-      socket.emit('join-room', trimmedRoom);
+      socket.emit('join-room', { roomId: trimmedRoom, userId });
+
+      socket.emit('get-history', { roomId: trimmedRoom, userId });
     }
   };
 
-  const renderHistory = (label: string, history: histType[]) => (
-    <div>
-      <h3>{label}</h3>
-      <ul className="guess-history">
-        {[...history]
-          .sort((a, b) => b.time.getTime() - a.time.getTime())
-          .map((hist, index) => (
-            <li className="list-box" key={index}>
-              <div className="guess-row">
-                <span className="guess-label">🔢 Guess:</span>
-                <span className="guess-value">{hist.pass}</span>
-              </div>
-              <div className="guess-row">
-                <span className="guess-label">🎯 Correct Pos:</span>
-                <span className="correct">{hist.correctPositions}</span>
-              </div>
-              <div className="guess-row">
-                <span className="guess-label">🔀 Wrong Pos:</span>
-                <span className="wrong">{hist.correctDigits}</span>
-              </div>
-            </li>
-          ))}
+  const renderHistory = (combinedHistory: LabeledHistType[]) => (
+    <div className="scrollable-history">
+      <h3>🕓 Guess History</h3>
+      <ul className="guess-history-list">
+        {combinedHistory.map((entry, index) => (
+          <li key={index} className="history-entry">
+            <span className="player-name">
+              {entry.player === 'you' ? '🧑 You' : '🕹️ Opponent'}
+            </span>
+            <span className="guess">{entry.pass}</span>
+            <span className="feedback">
+              ✅ {entry.correctPositions} | 🔄 {entry.correctDigits}
+            </span>
+          </li>
+        ))}
       </ul>
     </div>
   );
@@ -127,8 +137,7 @@ function App() {
 
       <main className="grid-main">
         <div className="list">
-          {renderHistory('🧠 Your Guesses', myHistory)}
-          {renderHistory('🕹️ Opponent Guesses', opponentHistory)}
+          {renderHistory(combinedHistory)}
         </div>
 
         <div className="main-content">
@@ -152,7 +161,14 @@ function App() {
               </div>
 
               {/* GAME COMPONENT */}
-              <GameType handleCallBack={handleCallBack} isMyTurn={isMyTurn} />
+              <GameType isMyTurn={isMyTurn} />
+              {isMyTurn && (
+                <div className='hint-section'>
+                  <button onClick={requestHint} disabled={hintUsed}>Get Hint</button>
+                  {hint && <p className="hint-box">💡 {hint}</p>}
+                </div>
+              )}
+
             </>
           )}
         </div>

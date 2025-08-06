@@ -1,18 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { socket } from '../socket';
 import './GameType.css';
+import type { GameTypeProps } from '../types/types';
 
-type histType = {
-  pass: string;
-  correctDigits: number;
-  correctPositions: number;
-  time: Date;
-};
 
-type GameTypeProps = {
-  handleCallBack: (hist: histType) => void;
-  isMyTurn: boolean;            // ✅ new prop
-};
 
 export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
   const [num1, setNum1] = useState<string>('');
@@ -33,7 +24,7 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
   const input3Ref = useRef<HTMLInputElement>(null);
   const input4Ref = useRef<HTMLInputElement>(null);
 
-  // Remove your-turn listener; parent now controls isMyTurn
+
 
   useEffect(() => {
     socket.on('player-won', () => {
@@ -46,13 +37,7 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
   }, []);
 
   useEffect(() => {
-    socket.on("guess-feedback", ({ guess, correctDigits, correctPositions, time }) => {
-      handleCallBack({
-        pass: guess,
-        correctDigits,
-        correctPositions,
-        time: new Date(time),
-      });
+    socket.on("guess-feedback", ({ correctDigits, correctPositions }) => {
 
       setCorrectDigits(correctDigits);
       setCorrectPositions(correctPositions);
@@ -100,8 +85,11 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
     if (gameOver) return;
     const guess = num1 + num2 + num3 + num4;
     if (guess.length === 4) {
+      const roomId = localStorage.getItem("roomId");
+      const userId = localStorage.getItem("userId");
       socket.emit("validate-guess", {
-        roomId: localStorage.getItem("roomId"),
+        roomId,
+        userId,
         guess,
       });
     }
