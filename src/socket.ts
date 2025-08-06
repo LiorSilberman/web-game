@@ -1,3 +1,4 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://192.168.1.102:3001");
+const hostname = window.location.hostname;
+export const socket = io(`http://${hostname}:3001`);
