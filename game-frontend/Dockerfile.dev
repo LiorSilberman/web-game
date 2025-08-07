@@ -1,0 +1,17 @@
+# Dockerfile.dev
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy only the package files first (for better caching)
+COPY package*.json ./
+RUN npm install
+
+# Now copy the rest of the code
+COPY . .
+
+# Expose Vite's dev port
+EXPOSE 5173
+
+# Run Vite in dev mode
+CMD ["npm", "run", "dev", "--", "--host"]
