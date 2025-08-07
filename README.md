@@ -86,37 +86,35 @@ npm install
 
 ## 📸 Screenshots
 
-<div style="display: flex; flex-wrap: wrap; gap: 20px;">
 
-  <div>
-    <p><strong>🏠 Enter Room</strong></p>
-    <img src="./screenshots/enter-room.jpeg" alt="Choose room" width="200"/>
-  </div>
-
-  <div>
-    <p><strong>⏳ Waiting for Opponent</strong></p>
-    <img src="./screenshots/waiting-start.png" alt="Wait for opponent screen" width="200"/>
-  </div>
-
-  <div>
-    <p><strong>🔢 Guess the Password</strong></p>
-    <img src="./screenshots/guessNumbers.jpeg" alt="Guess the password" width="200"/>
-  </div>
-
-  <div>
-    <p><strong>💡 Get Hint from Gemini</strong></p>
-    <img src="./screenshots/hint.png" alt="Get hint from Gemini" width="200"/>
-  </div>
-
-  <div>
-    <p><strong>❌ Lost Game Screen</strong></p>
-    <img src="./screenshots/lostGame.jpeg" alt="Lost game display" width="200"/>
-  </div>
-
-  <div>
-    <p><strong>🏆 Win Game Screen</strong></p>
-    <img src="./screenshots/winGame.png" alt="Win game display" width="200"/>
-  </div>
-
-</div>
+<table>
+  <tr>
+    <td align="center">
+      <strong>🏠 Enter Room</strong><br/>
+      <img src="./screenshots/enter-room.jpeg" width="200"/>
+    </td>
+    <td align="center">
+      <strong>⏳ Waiting</strong><br/>
+      <img src="./screenshots/waiting-start.png" width="200"/>
+    </td>
+    <td align="center">
+      <strong>🔢 Guess</strong><br/>
+      <img src="./screenshots/guessNumbers.jpeg" width="200"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>💡 Hint</strong><br/>
+      <img src="./screenshots/hint.png" width="200"/>
+    </td>
+    <td align="center">
+      <strong>❌ Lost</strong><br/>
+      <img src="./screenshots/lostGame.jpeg" width="200"/>
+    </td>
+    <td align="center">
+      <strong>🏆 Win</strong><br/>
+      <img src="./screenshots/winGame.png" width="200"/>
+    </td>
+  </tr>
+</table>
 
