@@ -56,6 +56,32 @@ cd game-frontend
 npm install
 ```
 
+### 🚀 Running with Docker
+#### Prerequisites
+- **Docker installed**
+- **Docker Compose installed**
+
+#### Build & Run
+```bash
+docker compose up --build
+```
+**This will:**
+- Build and run the frontend (Vite, on port 5173)
+- Build and run the backend (Node.js, on port 3001)
+
+Visit the app at: http://localhost:5173
+
+#### Run only frontend or backend
+- **Frontend only:**
+```bash
+docker compose up frontend
+```
+- **Backend only:**
+```bash
+docker compose up backend
+```
+
+
 ## 💡 Hint System (Gemini API)
 **Each player can request one personalized hint during the game. Hints are:**
 - Based on the password and the player's guess history.
