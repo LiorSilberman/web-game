@@ -12,10 +12,13 @@ services:
       - /app/node_modules
     environment:
       - VITE_BACKEND_URL=http://host.docker.internal:3001
+      # Optional: help Vite detect changes in Docker on some hosts
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     depends_on:
       - backend
     extra_hosts:
-    - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
 
   backend:
     build:
@@ -25,9 +28,11 @@ services:
       - "3001:3001"
     volumes:
       - ./game-backend:/app
-      - /app/node_modules
+    env_file:
+      - ./game-backend/.env
     environment:
       - NODE_ENV=development
+    command: npm run dev
 
 networks:
   default:
