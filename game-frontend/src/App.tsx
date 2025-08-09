@@ -11,6 +11,7 @@ function App() {
   const [joinedRoom, setJoinedRoom] = useState(false);
   const [startGame, setStartGame] = useState(false);
   const [combinedHistory, setCombinedHistory] = useState<LabeledHistType[]>([]);
+  const [round, setRound] = useState(0);
 
   // NEW: track whose turn it is
   const [isMyTurn, setIsMyTurn] = useState(false);
@@ -35,11 +36,24 @@ function App() {
     });
   }
 
-  const requestHint = () => {
-    if (!hintUsed) {
-      socket.emit('request-hint', { roomId, userId });
+ 
+
+  useEffect(() => {
+    const onStartRematch = () => {
+      // wipe top-level UI so the board is clean immediately
+      setCombinedHistory([]);
+      setHint('');
+      setHintUsed(false);
+      setIsMyTurn(false);         // will be set by the next 'your-turn'
+      setStartGame(true);         // make sure board is visible
+      setRound(r => r + 1);       // 🔑 forces GameType to re-mount
+    };
+
+    socket.on('start-rematch', onStartRematch);
+    return () => {
+      socket.off('start-rematch', onStartRematch);
     }
-  }
+  }, []);
 
   useEffect(() => {
     socket.on('receive-hint', (hintMsg) => {
@@ -111,23 +125,52 @@ function App() {
   };
 
   const renderHistory = (combinedHistory: LabeledHistType[]) => (
-    <div className="scrollable-history">
-      <h3>🕓 Guess History</h3>
-      <ul className="guess-history-list">
-        {combinedHistory.map((entry, index) => (
-          <li key={index} className="history-entry">
-            <span className="player-name">
-              {entry.player === 'you' ? '🧑 You' : '🕹️ Opponent'}
-            </span>
-            <span className="guess">{entry.pass}</span>
-            <span className="feedback">
-              ✅ {entry.correctPositions} | 🔄 {entry.correctDigits}
-            </span>
-          </li>
-        ))}
-      </ul>
+  <div className="scrollable-history">
+    <h3>🕓 Guess History</h3>
+
+    {/* Header */}
+    <ul className="guess-history-list">
+      <li className="history-entry history-header">
+        <span className="player-name">Player</span>
+        <span className="guess-label">Guess</span>
+        <span className="feedback-label">
+          <span title="Number in the correct position" aria-label="Correct position">✅</span>
+          <span className="sep"> | </span>
+          <span title="Correct digit, wrong position" aria-label="Correct digit, wrong position">🔄</span>
+        </span>
+      </li>
+
+      {/* Rows */}
+      {combinedHistory.map((entry, index) => (
+        <li key={index} className="history-entry">
+          <span className="player-name">
+            {entry.player === 'you' ? '🧑 You' : '🕹️ Opponent'}
+          </span>
+          <span className="guess">{entry.pass}</span>
+          <span className="feedback">
+            <span title="Number in the correct position" aria-label="Correct position">✅</span>
+            <strong> {entry.correctPositions}</strong>
+            <span className="sep"> | </span>
+            <span title="Correct digit, wrong position" aria-label="Correct digit, wrong position">🔄</span>
+            <strong> {entry.correctDigits}</strong>
+          </span>
+        </li>
+      ))}
+    </ul>
+
+    {/* Legend */}
+    <div className="history-legend" role="note">
+      <span className="legend-item">
+        <span className="legend-icon" aria-hidden="false">✅</span>
+        <span>Number in the correct position</span>
+      </span>
+      <span className="legend-item">
+        <span className="legend-icon" aria-hidden>🔄</span>
+        <span>Correct digit, wrong position</span>
+      </span>
     </div>
-  );
+  </div>
+);
 
   return (
     <div className="container">
@@ -161,14 +204,7 @@ function App() {
               </div>
 
               {/* GAME COMPONENT */}
-              <GameType isMyTurn={isMyTurn} />
-              {isMyTurn && (
-                <div className='hint-section'>
-                  <button onClick={requestHint} disabled={hintUsed}>Get Hint</button>
-                  {hint && <p className="hint-box">💡 {hint}</p>}
-                </div>
-              )}
-
+              <GameType key={round} isMyTurn={isMyTurn} hintUsed={hintUsed} hint={hint}/>
             </>
           )}
         </div>

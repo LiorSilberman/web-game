@@ -5,7 +5,7 @@ import type { GameTypeProps } from '../types/types';
 
 
 
-export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
+export default function GameType({ isMyTurn, hintUsed, hint }: GameTypeProps) {
   const [num1, setNum1] = useState<string>('');
   const [num2, setNum2] = useState<string>('');
   const [num3, setNum3] = useState<string>('');
@@ -24,6 +24,7 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
   const input3Ref = useRef<HTMLInputElement>(null);
   const input4Ref = useRef<HTMLInputElement>(null);
 
+  const [isRematch, setIsRematch] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -74,6 +75,7 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
       setYouLost(false);
       setIsWin(false);
       setWrong(false);
+      setIsRematch(false);
       resetInputs();
     });
     return () => {
@@ -103,37 +105,53 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
     input1Ref.current?.focus();
   };
 
+  const requestHint = () => {
+    if (!hintUsed) {
+      const roomId = localStorage.getItem("roomId");
+      const userId = localStorage.getItem("userId");
+      socket.emit('request-hint', { roomId, userId });
+    }
+  }
+
   return (
     <div className="game-container">
       <h2>Guess Your Opponent's Password</h2>
 
       <div className="game-box">
-        {[num1, num2, num3, num4].map((val, idx) => {
-          const setters = [setNum1, setNum2, setNum3, setNum4] as const;
-          const refs = [input1Ref, input2Ref, input3Ref, input4Ref] as const;
-          const nextRefs = [input2Ref, input3Ref, input4Ref, null] as const;
+        <div className='input-section'>
+          {[num1, num2, num3, num4].map((val, idx) => {
+            const setters = [setNum1, setNum2, setNum3, setNum4] as const;
+            const refs = [input1Ref, input2Ref, input3Ref, input4Ref] as const;
+            const nextRefs = [input2Ref, input3Ref, input4Ref, null] as const;
 
-          return (
-            <div key={idx} className={`box${idx + 1}`}>
-              <input
-                ref={refs[idx]}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                pattern="[0-9]"
-                value={val}
-                disabled={!isMyTurn || gameOver}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === '' || /^[0-9]$/.test(v)) {
-                    setters[idx](v);
-                    if (v && nextRefs[idx]) nextRefs[idx]!.current?.focus();
-                  }
-                }}
-              />
-            </div>
-          );
-        })}
+            return (
+              <div key={idx} className={`box${idx + 1}`}>
+                <input
+                  ref={refs[idx]}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  pattern="[0-9]"
+                  value={val}
+                  disabled={!isMyTurn || gameOver}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === '' || /^[0-9]$/.test(v)) {
+                      setters[idx](v);
+                      if (v && nextRefs[idx]) nextRefs[idx]!.current?.focus();
+                    }
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+        {isMyTurn && (
+          <div className='hint-section'>
+            <button onClick={requestHint} disabled={hintUsed}>Get Hint</button>
+            {hint && <p className="hint-box">💡 {hint}</p>}
+          </div>
+        )}
       </div>
 
       <div className="result">
@@ -154,7 +172,17 @@ export default function GameType({ handleCallBack, isMyTurn }: GameTypeProps) {
         <div className="game-over">
           <h2>{youLost ? "😢 You Lost!" : "🎉 You Win!"}</h2>
           <p>Waiting for opponent to accept rematch...</p>
-          <button onClick={() => socket.emit("request-rematch", localStorage.getItem("roomId"))}>
+          <button
+            onClick={() => {
+              const roomId = localStorage.getItem("roomId");
+              const userId = localStorage.getItem("userId");
+              setIsRematch(true);
+              if (roomId && userId) {
+                socket.emit("request-rematch", { roomId, userId });
+              }
+            }}
+            disabled={isRematch}
+          >
             🔁 Play Again
           </button>
         </div>

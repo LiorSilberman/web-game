@@ -1,166 +1,202 @@
+/* ============================
+   Tokens & Motion
+============================ */
+:root {
+  --ink:  #f0f5e1;
+  --input-ink: #1b2d1c;
+  --accent: #61A62F;
+  --accent-strong: #4e8c25;
+  --good: #2e8b57;
+  --warn: #e67300;
+  --info: #0077cc;
+  --ring: rgba(97, 166, 47, 0.35);
+  --shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  --radius: 14px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .focus-bump { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
+}
+
+/* ============================
+   Container & Headings
+============================ */
 .game-container {
-  display: flex;
-  flex-direction: column;
-  height: 80%;
+  display: grid;
+  grid-auto-rows: max-content;
+  justify-items: center;
+  gap: 1rem;
   width: 100%;
-  justify-content: center;
-  align-items: center;
+  min-height: 70%;
+  padding: 0 1rem 1.5rem;
+  color: var(--ink);
   text-align: center;
-  color: #1A3109;
-  margin: 0 1rem;
 }
 
 h2 {
-  margin-bottom: 1rem;
-  font-size: 2rem;
-  color: #1A3109;
+  margin: .25rem 0 .75rem;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem);
+  color: var(--ink);
 }
 
+/* ============================
+   Input Row (Code Boxes)
+============================ */
 .game-box {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: clamp(.5rem, 2vw, 1rem);
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  justify-content: center;
+  margin-bottom: 1rem; 
+}
+
+.input-section{
+    display: grid;
+  grid-auto-flow: column;
+  gap: clamp(.5rem, 2vw, 1rem);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
 input {
-  width: 50px;
-  height: 3.5rem;
+  width: clamp(48px, 6vw, 64px);
+  height: clamp(56px, 7vw, 72px);
   text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  font-family: 'Courier New', Courier, monospace;
-  border: 2px solid #61A62F;
-  border-radius: 35%;
-  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
-  color: #1A3109;
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  color: var(--input-ink);
+  background: #f7fff1;
+  box-shadow: var(--shadow);
   outline: none;
-  transition: transform 0.1s;
 }
 
+/* smoother focus & tap feedback */
 input:focus {
-  transform: scale(1.1);
-  border-color: #4e8c25;
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 4px var(--ring), var(--shadow);
+  transform: translateY(-1px);
 }
 
+/* disabled when it's not your turn OR game over */
+input:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  background: #eef3e9;
+  border-color: #bcd6a6;
+  box-shadow: none;
+  transform: none;
+}
+
+/* iOS numeric keyboard fixes */
+input {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ============================
+   Result / Feedback
+============================ */
 .result {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  display: grid;
+  gap: .35rem;
+  font-size: clamp(1rem, 1vw + .9rem, 1.15rem);
+  margin-bottom: .5rem;
 }
 
-.result p {
-  font-size: 1.1rem;
-  margin: 0.3rem 0;
-  line-height: 1.4;
-}
+.result p { margin: 0; line-height: 1.35; }
+.result p strong { color: var(--ink); font-weight: 800; }
 
-.result p strong {
-  color: #1A3109;
-  font-weight: 700;
-}
-
-.result .correct-position {
-  color: #2e8b57;
-}
-
-.result .wrong-position {
-  color: #e67300;
-}
+.result .correct-position { color: var(--good); }
+.result .wrong-position { color: var(--warn); }
 
 .win-message {
-  color: #0077cc;
-  font-weight: bold;
-  margin-top: 0.5rem;
+  color: var(--info);
+  font-weight: 800;
+  margin-top: .35rem;
 }
 
+/* ============================
+   Timer Badge
+============================ */
 .timer {
+  position: relative; /* container for absolute child */
   display: flex;
   justify-content: center;
 }
 
 .timer p {
-  position: absolute;
-  top: 100px;
-  right: 100px;
-  width: 100px;
-  height: 100px;
-  border: 3px solid #1A3109;
+  position: fixed;        /* keep in viewport corner */
+  top: 18px;
+  right: 18px;
+  width: clamp(56px, 10vw, 90px);
+  height: clamp(56px, 10vw, 90px);
+  border: 3px solid var(--ink);
   border-radius: 50%;
-  font-weight: bold;
-  font-size: 3rem;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-weight: 900;
+  font-size: clamp(1.25rem, 3.5vw, 2rem);
+  background: #ffffffcc;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+  z-index: 5;
 }
 
+/* ============================
+   Game Over / Rematch
+============================ */
 .game-over {
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   text-align: center;
 }
 
 .game-over h2 {
-  color: green;
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  color: var(--good);
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem);
+  margin-bottom: .75rem;
 }
 
 .game-over button {
-  padding: 0.6rem 1.2rem;
+  padding: .65rem 1.25rem;
   font-size: 1rem;
-  background-color: #61A62F;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
   border: none;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: .25px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  box-shadow: var(--shadow);
+  transition: transform .08s ease, filter .15s ease, opacity .2s ease;
+}
+.game-over button:disabled {
+  background-color: #ccc; /* Light grey background */
+  color: #666; /* Dimmed text */
+  cursor: not-allowed; /* Show "forbidden" cursor */
+  box-shadow: none; /* Remove shadow */
+  transform: none; /* Prevent hover transform effect */
+  opacity: 0.6; /* Make it look inactive */
 }
 
-.game-over button:hover {
-  background-color: #4e8c25;
-}
+.game-over button:hover { filter: brightness(1.05); }
+.game-over button:active { transform: translateY(1px); }
 
+/* ============================
+   Responsive
+============================ */
 @media (max-width: 768px) {
-  .game-box {
-    gap: 0.5rem;
-  }
-
-  input {
-    width: 40px;
-    height: 3rem;
-    font-size: 1.5rem;
-  }
-
-  .timer p {
-    top: 20px;
-    right: 20px;
-    width: 80px;
-    height: 80px;
-    font-size: 2rem;
-  }
+  .game-container { gap: .75rem; }
+  .game-box { gap: .6rem; }
 }
 
 @media (max-width: 480px) {
-  .game-container {
-    justify-content: start;
-  }
-
-  input {
-    width: 30px;
-    height: 2rem;
-    font-size: 1rem;
-  }
-
-  .timer p {
-    width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
-    top: 15px;
-    right: 15px;
-  }
+  .game-container { align-items: center; justify-content: start;}
+  .game-box { gap: .5rem; }
 }

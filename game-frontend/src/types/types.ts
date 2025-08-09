@@ -8,6 +8,8 @@ export type histType = {
 
 export type GameTypeProps = {
   isMyTurn: boolean;
+  hintUsed: boolean;
+  hint: string;
 };
 
 export type LabeledHistType = histType & {
