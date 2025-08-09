@@ -93,7 +93,7 @@ main {
 /* Desktop: two columns */
 @media (min-width: 900px) {
   .grid-main {
-    grid-template-columns: minmax(260px, 380px) 1fr;
+    grid-template-columns: 1fr 1.5fr;
     align-items: start;
   }
 }
@@ -213,7 +213,7 @@ main {
 .history-entry:last-child { border-bottom: 0; }
 
 .player-name {
-  width: 30%;
+  width: 35%;
   color: var(--ink-dim);
   min-width: 100px;
 }
@@ -226,12 +226,14 @@ main {
   padding: 2px 8px;
   border-radius: 8px;
   letter-spacing: 2px;
+  margin-right: 10%;
 }
 
 .feedback {
   justify-self: end;
   color: var(--muted);
   font-weight: 600;
+  padding-right: 0.75rem;
 }
 
 /* Labels in the header */

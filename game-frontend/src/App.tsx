@@ -148,10 +148,10 @@ function App() {
           </span>
           <span className="guess">{entry.pass}</span>
           <span className="feedback">
-            <span title="Number in the correct position" aria-label="Correct position">✅</span>
+            <span title="Number in the correct position" aria-label="Correct position"></span>
             <strong> {entry.correctPositions}</strong>
             <span className="sep"> | </span>
-            <span title="Correct digit, wrong position" aria-label="Correct digit, wrong position">🔄</span>
+            <span title="Correct digit, wrong position" aria-label="Correct digit, wrong position"></span>
             <strong> {entry.correctDigits}</strong>
           </span>
         </li>
